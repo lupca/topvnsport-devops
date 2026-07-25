@@ -6,7 +6,7 @@
 | Account ID | `402631154151` |
 | Region | `us-east-1` |
 
-## EC2 Instance (Current)
+## EC2 Instance
 | Key | Value |
 |:----|:------|
 | Instance ID | `i-0ede7353edeef0c63` |
@@ -16,29 +16,48 @@
 | SSH Key | `~/.ssh/id_rsa` |
 | Name Tag | `topvnsport` |
 
-## RDS Aurora PostgreSQL (Created, not connected yet)
+## RDS Aurora PostgreSQL — CONNECTED (2026-07-25)
 | Key | Value |
 |:----|:------|
 | Cluster Endpoint | `database-topvnsport.cluster-copm008y8icu.us-east-1.rds.amazonaws.com` |
 | Port | `5432` |
-| Database | `postgres` |
+| Databases | `pmi`, `oms`, `wms`, `identity` |
 | Username | `postgres` |
 | Auth | IAM Database Authentication |
+| Status | **Data migrated, verified** |
+
+### Databases Migrated
+| Database | Records | Migrated |
+|:---------|:--------|:---------|
+| pmi | 65 products | ✅ 2026-07-25 |
+| oms | 3 orders | ✅ 2026-07-25 |
+| wms | inventory | ✅ 2026-07-25 |
+| identity | users | ✅ 2026-07-25 |
 
 ### RDS Connection Example
 ```bash
 export RDSHOST="database-topvnsport.cluster-copm008y8icu.us-east-1.rds.amazonaws.com"
-psql "host=$RDSHOST port=5432 dbname=postgres user=postgres sslmode=require password=$(aws rds generate-db-auth-token --hostname $RDSHOST --port 5432 --username postgres --region us-east-1)"
+TOKEN=$(aws rds generate-db-auth-token --hostname $RDSHOST --port 5432 --username postgres --region us-east-1)
+psql "host=$RDSHOST port=5432 dbname=pmi user=postgres sslmode=require password=$TOKEN"
 ```
 
-## S3 (To be created)
+## S3 — CREATED + DATA MIGRATED (2026-07-25)
 | Key | Value |
 |:----|:------|
-| Bucket Name | `topvnsport-assets` (proposed) |
+| Bucket Name | `topvnsport-assets` |
 | Region | `us-east-1` |
 | Purpose | Replace MinIO for file storage |
+| Objects | 3898 files |
+| Size | 433 MiB |
+| Status | **Data migrated from MinIO** |
 
-## GitHub Secrets (To configure for CI/CD)
+### S3 Structure
+```
+s3://topvnsport-assets/
+└── pim-media/          # Product images (3898 files, migrated from MinIO)
+```
+
+## GitHub Secrets (Required for CI/CD)
 ```
 AWS_ACCESS_KEY_ID=<from IAM user>
 AWS_SECRET_ACCESS_KEY=<from IAM user>
@@ -47,13 +66,12 @@ AWS_REGION=us-east-1
 # EC2 SSH
 EC2_HOST=52.203.250.214
 EC2_USER=lupca
-EC2_SSH_KEY=<private key content>
+DEPLOY_SSH_KEY=<private key content>
 
-# RDS
+# RDS (use IAM auth, no static password)
 RDS_HOST=database-topvnsport.cluster-copm008y8icu.us-east-1.rds.amazonaws.com
 RDS_PORT=5432
 RDS_USER=postgres
-RDS_PASSWORD=<generate secure password or use IAM auth>
 
 # S3
 S3_BUCKET=topvnsport-assets
@@ -61,22 +79,31 @@ S3_REGION=us-east-1
 ```
 
 ## Current Services on EC2
-| Service | API Port | DB Port (container) | Notes |
-|:--------|:---------|:--------------------|:------|
-| Gateway (Nginx) | 80 | - | Reverse proxy |
-| Identity (SSO) | 18110 | 15436 | Needs migrate to RDS |
-| PMI | 18100 | 15433 | Needs migrate to RDS |
-| OMS | 18101 | 15434 | Needs migrate to RDS |
-| WMS | 18102 | 15435 | Needs migrate to RDS |
-| Web | 3000 | - | Next.js storefront |
-| MinIO | 19005 | - | → Replace with S3 |
+| Service | API Port | DB | Storage | Notes |
+|:--------|:---------|:---|:--------|:------|
+| Gateway (Nginx) | 80 | - | - | Reverse proxy |
+| Identity (SSO) | 18110 | **RDS** | - | ✅ Migrated |
+| PMI | 18100 | **RDS** | **S3** | ✅ Migrated |
+| OMS | 18101 | **RDS** | - | ✅ Migrated |
+| WMS | 18102 | **RDS** | - | ✅ Migrated |
+| Web | 3000 | - | - | Next.js storefront |
+| MinIO | 19005 | - | - | **DEPRECATED** → S3 |
 
-## Migration Plan Summary
-1. IaC: Import existing EC2 + RDS into Terraform
-2. Create S3 bucket via Terraform
-3. Update app configs to use RDS + S3
-4. Migrate data: PostgreSQL containers → RDS
-5. Migrate files: MinIO → S3
-6. Update CI/CD with new env vars
+## Migration Status
+| Phase | Status | Date |
+|:------|:-------|:-----|
+| RDS databases created | ✅ Done | 2026-07-25 |
+| PostgreSQL data migrated | ✅ Done | 2026-07-25 |
+| S3 bucket created | ✅ Done | 2026-07-25 |
+| MinIO data migrated | ✅ Done | 2026-07-25 |
+| Apps redeployed with RDS config | ⏳ Pending | - |
+| Image URLs updated in DB | ⏳ Pending | - |
+| Terraform import existing resources | ⏳ Pending | - |
+
+## Pending Actions
+1. **Redeploy apps** with RDS/S3 config on EC2
+2. **Update image URLs** in `product_media.image_url` from MinIO to S3
+3. **Terraform import** EC2, VPC, RDS into state
+4. **Stop MinIO** container after cutover verified
 
 See [[docs/migration-runbook.md]] for step-by-step execution instructions.
