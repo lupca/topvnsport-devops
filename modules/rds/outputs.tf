@@ -15,5 +15,5 @@ output "cluster_reader_endpoint" {
 
 output "security_group_id" {
   description = "ID of the RDS security group"
-  value       = aws_security_group.rds.id
+  value       = data.aws_security_group.rds.id
 }

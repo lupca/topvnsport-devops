@@ -19,13 +19,13 @@ variable "key_name" {
   type        = string
 }
 
-variable "vpc_id" {
-  description = "VPC ID to launch the instance and security group in"
+variable "subnet_id" {
+  description = "Subnet ID to launch the instance in"
   type        = string
 }
 
-variable "subnet_id" {
-  description = "Subnet ID to launch the instance in"
+variable "security_group_id" {
+  description = "Existing security group ID for the instance"
   type        = string
 }
 
@@ -33,40 +33,6 @@ variable "root_volume_size" {
   description = "Root EBS volume size in GB"
   type        = number
   default     = 30
-}
-
-variable "ingress_rules" {
-  description = "Ingress rules for the application security group"
-  type = list(object({
-    description = string
-    from_port   = number
-    to_port     = number
-    protocol    = string
-    cidr_blocks = list(string)
-  }))
-  default = [
-    {
-      description = "SSH"
-      from_port   = 22
-      to_port     = 22
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-    },
-    {
-      description = "HTTP"
-      from_port   = 80
-      to_port     = 80
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-    },
-    {
-      description = "HTTPS"
-      from_port   = 443
-      to_port     = 443
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-    },
-  ]
 }
 
 variable "tags" {

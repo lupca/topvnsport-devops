@@ -20,10 +20,14 @@ variable "master_password" {
   sensitive   = true
 }
 
-variable "database_name" {
-  description = "Name of the default database created with the cluster"
+variable "db_subnet_group_name" {
+  description = "Name of existing DB subnet group"
   type        = string
-  default     = "postgres"
+}
+
+variable "security_group_id" {
+  description = "Existing security group ID for the RDS cluster"
+  type        = string
 }
 
 variable "serverless_min_capacity" {
@@ -44,26 +48,16 @@ variable "storage_encrypted" {
   default     = true
 }
 
-variable "vpc_id" {
-  description = "VPC ID to launch the RDS security group in"
-  type        = string
-}
-
-variable "subnet_ids" {
-  description = "Subnet IDs for the DB subnet group (must span at least 2 AZs)"
-  type        = list(string)
-}
-
-variable "allowed_security_group_ids" {
-  description = "Security groups allowed to connect to the database on port 5432"
-  type        = list(string)
-  default     = []
-}
-
 variable "backup_retention_period" {
   description = "Number of days to retain automated backups"
   type        = number
   default     = 7
+}
+
+variable "skip_final_snapshot" {
+  description = "Skip final snapshot when destroying"
+  type        = bool
+  default     = false
 }
 
 variable "tags" {

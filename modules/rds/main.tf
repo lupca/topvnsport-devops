@@ -1,35 +1,10 @@
-resource "aws_db_subnet_group" "main" {
-  name       = "${var.cluster_identifier}-subnet-group"
-  subnet_ids = var.subnet_ids
-
-  tags = merge(var.tags, {
-    Name = "${var.cluster_identifier}-subnet-group"
-  })
+# Use existing subnet group and security group
+data "aws_db_subnet_group" "main" {
+  name = var.db_subnet_group_name
 }
 
-resource "aws_security_group" "rds" {
-  name        = "${var.cluster_identifier}-sg"
-  description = "Security group for the ${var.cluster_identifier} Aurora cluster"
-  vpc_id      = var.vpc_id
-
-  ingress {
-    description     = "PostgreSQL from application security groups"
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = var.allowed_security_group_ids
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = merge(var.tags, {
-    Name = "${var.cluster_identifier}-sg"
-  })
+data "aws_security_group" "rds" {
+  id = var.security_group_id
 }
 
 resource "aws_rds_cluster" "main" {
@@ -37,14 +12,12 @@ resource "aws_rds_cluster" "main" {
   engine                  = "aurora-postgresql"
   engine_mode             = "provisioned"
   engine_version          = var.engine_version
-  database_name           = var.database_name
   master_username         = var.master_username
   master_password         = var.master_password
-  db_subnet_group_name    = aws_db_subnet_group.main.name
-  vpc_security_group_ids  = [aws_security_group.rds.id]
+  db_subnet_group_name    = data.aws_db_subnet_group.main.name
+  vpc_security_group_ids  = [data.aws_security_group.rds.id]
   backup_retention_period = var.backup_retention_period
-  final_snapshot_identifier = "${var.cluster_identifier}-final"
-  skip_final_snapshot     = false
+  skip_final_snapshot     = var.skip_final_snapshot
   storage_encrypted       = var.storage_encrypted
 
   serverlessv2_scaling_configuration {
@@ -57,7 +30,12 @@ resource "aws_rds_cluster" "main" {
   })
 
   lifecycle {
-    ignore_changes = [master_password]
+    ignore_changes = [
+      master_password,
+      availability_zones,
+      db_subnet_group_name,
+      vpc_security_group_ids,
+    ]
   }
 }
 
