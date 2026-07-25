@@ -4,11 +4,11 @@ output "instance_id" {
 }
 
 output "public_ip" {
-  description = "Public IP address of the EC2 instance"
+  description = "Public IP address"
   value       = aws_instance.topvnsport.public_ip
 }
 
 output "security_group_id" {
-  description = "ID of the application security group"
-  value       = data.aws_security_group.app.id
+  description = "Security group ID (created or existing)"
+  value       = local.security_group_id
 }

@@ -1,67 +1,94 @@
 variable "cluster_identifier" {
-  description = "Identifier of the Aurora cluster (must match the existing cluster being imported)"
+  description = "RDS cluster identifier"
   type        = string
 }
 
 variable "engine_version" {
-  description = "Aurora PostgreSQL engine version (must match the existing cluster)"
+  description = "Aurora PostgreSQL engine version"
   type        = string
+  default     = "15.4"
 }
 
 variable "master_username" {
-  description = "Master username for the cluster"
+  description = "Master username"
   type        = string
   default     = "postgres"
 }
 
 variable "master_password" {
-  description = "Master password for the cluster. Do not hardcode - pass via TF_VAR_rds_master_password or a secret manager"
+  description = "Master password"
   type        = string
   sensitive   = true
 }
 
-variable "db_subnet_group_name" {
-  description = "Name of existing DB subnet group"
+# For creating new resources
+variable "vpc_id" {
+  description = "VPC ID (required if creating new SG)"
   type        = string
+  default     = ""
 }
 
-variable "security_group_id" {
-  description = "Existing security group ID for the RDS cluster"
-  type        = string
+variable "subnet_ids" {
+  description = "Subnet IDs for DB subnet group (required if creating new)"
+  type        = list(string)
+  default     = []
 }
 
+variable "allowed_cidr_blocks" {
+  description = "CIDR blocks allowed to connect"
+  type        = list(string)
+  default     = []
+}
+
+variable "allowed_security_group_ids" {
+  description = "Security groups allowed to connect"
+  type        = list(string)
+  default     = []
+}
+
+# For using existing resources
+variable "existing_db_subnet_group_name" {
+  description = "Existing DB subnet group name. If empty, creates new one."
+  type        = string
+  default     = ""  # Empty = create new
+}
+
+variable "existing_security_group_id" {
+  description = "Existing security group ID. If empty, creates new one."
+  type        = string
+  default     = ""  # Empty = create new
+}
+
+# Scaling
 variable "serverless_min_capacity" {
-  description = "Minimum ACU capacity for Serverless v2"
+  description = "Min ACU for Serverless v2"
   type        = number
   default     = 0.5
 }
 
 variable "serverless_max_capacity" {
-  description = "Maximum ACU capacity for Serverless v2"
+  description = "Max ACU for Serverless v2"
   type        = number
   default     = 8
 }
 
+# Other
 variable "storage_encrypted" {
-  description = "Enable storage encryption"
-  type        = bool
-  default     = true
+  type    = bool
+  default = true
 }
 
 variable "backup_retention_period" {
-  description = "Number of days to retain automated backups"
-  type        = number
-  default     = 7
+  type    = number
+  default = 7
 }
 
 variable "skip_final_snapshot" {
-  description = "Skip final snapshot when destroying"
-  type        = bool
-  default     = false
+  type    = bool
+  default = false
 }
 
 variable "tags" {
-  description = "Common tags to apply to all resources"
-  type        = map(string)
-  default     = {}
+  type    = map(string)
+  default = {}
 }

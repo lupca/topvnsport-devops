@@ -1,0 +1,24 @@
+# Development environment - creates NEW resources
+# Copy to dev/terraform.tfvars and customize
+
+environment = "dev"
+region      = "us-east-1"
+
+# --- VPC (create new) ---
+vpc_cidr            = "10.0.0.0/16"
+public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
+availability_zones  = ["us-east-1a", "us-east-1b"]
+
+# --- EC2 (create new) ---
+ec2_ami_id         = "ami-0c7217cdde317cfec"  # Amazon Linux 2023
+ec2_instance_type  = "t3.micro"               # Smaller for dev
+ec2_key_name       = "dev-key"
+ec2_subnet_id      = ""                       # Empty = use VPC module
+ec2_existing_sg_id = ""                       # Empty = create new
+
+# --- RDS (create new) ---
+rds_engine_version        = "15.4"
+rds_min_capacity          = 0.5
+rds_max_capacity          = 2                 # Smaller for dev
+rds_existing_subnet_group = ""                # Empty = create new
+rds_existing_sg_id        = ""                # Empty = create new

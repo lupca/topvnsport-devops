@@ -11,42 +11,57 @@ variable "environment" {
 }
 
 variable "region" {
-  description = "AWS region (the existing production infrastructure lives in us-east-1)"
+  description = "AWS region"
   type        = string
   default     = "us-east-1"
 }
 
 # --- VPC ---
-# Fill in after `aws ec2 describe-vpcs` / `aws ec2 describe-subnets` — see docs/migration-runbook.md
 variable "vpc_cidr" {
-  description = "CIDR block of the existing VPC"
+  description = "VPC CIDR block"
   type        = string
 }
 
 variable "public_subnet_cidrs" {
-  description = "CIDR blocks of the existing public subnets"
+  description = "Public subnet CIDRs"
   type        = list(string)
 }
 
 variable "availability_zones" {
-  description = "AZs matching public_subnet_cidrs, in the same order"
+  description = "Availability zones"
   type        = list(string)
 }
 
 # --- EC2 ---
-# Fill in after `aws ec2 describe-instances --instance-ids i-0ede7353edeef0c63`
 variable "ec2_ami_id" {
-  description = "AMI ID of the existing topvnsport instance"
+  description = "AMI ID"
   type        = string
+}
+
+variable "ec2_instance_type" {
+  description = "EC2 instance type"
+  type        = string
+  default     = "t3.medium"
 }
 
 variable "ec2_key_name" {
-  description = "EC2 key pair name used by the existing instance"
+  description = "EC2 key pair name"
   type        = string
 }
 
+variable "ec2_subnet_id" {
+  description = "Existing subnet ID for EC2. If empty, uses VPC module output."
+  type        = string
+  default     = ""
+}
+
+variable "ec2_existing_sg_id" {
+  description = "Existing security group ID for EC2. If empty, creates new."
+  type        = string
+  default     = ""
+}
+
 # --- RDS ---
-# Cluster: topvnsport-db (Aurora PostgreSQL Serverless v2)
 variable "rds_engine_version" {
   description = "Aurora PostgreSQL engine version"
   type        = string
@@ -54,7 +69,37 @@ variable "rds_engine_version" {
 }
 
 variable "rds_master_password" {
-  description = "Master password for the RDS cluster. Pass via TF_VAR_rds_master_password, never commit it"
+  description = "Master password (pass via TF_VAR_rds_master_password)"
   type        = string
   sensitive   = true
+}
+
+variable "rds_min_capacity" {
+  description = "Serverless min ACU"
+  type        = number
+  default     = 0.5
+}
+
+variable "rds_max_capacity" {
+  description = "Serverless max ACU"
+  type        = number
+  default     = 8
+}
+
+variable "rds_existing_subnet_group" {
+  description = "Existing DB subnet group name. If empty, creates new."
+  type        = string
+  default     = ""
+}
+
+variable "rds_existing_sg_id" {
+  description = "Existing security group ID for RDS. If empty, creates new."
+  type        = string
+  default     = ""
+}
+
+# --- S3 ---
+variable "s3_bucket_name" {
+  description = "S3 bucket name"
+  type        = string
 }
