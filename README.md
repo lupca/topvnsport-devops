@@ -176,6 +176,62 @@ Trong GitHub repo → Settings → Variables:
 | `PROD_RDS_EXISTING_SG_ID` | `sg-05043d7ea0114b259` |
 | `PROD_S3_BUCKET_NAME` | `topvnsport-assets` |
 
+### Setup GitHub Secrets & Variables (CLI)
+
+```bash
+cd topvnsport-devops
+
+# === SECRETS (sensitive) ===
+gh secret set AWS_ACCESS_KEY_ID
+# (nhập key khi được hỏi)
+
+gh secret set AWS_SECRET_ACCESS_KEY
+# (nhập secret khi được hỏi)
+
+gh secret set PROD_RDS_MASTER_PASSWORD
+# (nhập password khi được hỏi)
+
+# === VARIABLES (non-sensitive) ===
+
+# VPC
+gh variable set PROD_VPC_CIDR --body "172.31.0.0/16"
+gh variable set PROD_PUBLIC_SUBNET_CIDRS --body '["172.31.0.0/20","172.31.80.0/20","172.31.32.0/20"]'
+gh variable set PROD_AVAILABILITY_ZONES --body '["us-east-1a","us-east-1b","us-east-1d"]'
+
+# EC2
+gh variable set PROD_EC2_AMI_ID --body "ami-06067086cf86c58e6"
+gh variable set PROD_EC2_KEY_NAME --body "local"
+gh variable set PROD_EC2_SUBNET_ID --body "subnet-02d90789c6c5af683"
+gh variable set PROD_EC2_EXISTING_SG_ID --body "sg-0051b179f57a7ad15"
+
+# RDS
+gh variable set PROD_RDS_ENGINE_VERSION --body "17.4"
+gh variable set PROD_RDS_EXISTING_SUBNET_GROUP --body "topvnsport-db-subnet"
+gh variable set PROD_RDS_EXISTING_SG_ID --body "sg-05043d7ea0114b259"
+
+# S3
+gh variable set PROD_S3_BUCKET_NAME --body "topvnsport-assets"
+
+# Kiểm tra
+gh variable list
+gh secret list
+```
+
+### Setup cho môi trường mới (ví dụ: staging)
+
+```bash
+# Đổi prefix PROD_ thành STAGING_
+gh variable set STAGING_VPC_CIDR --body "10.1.0.0/16"
+gh variable set STAGING_EC2_EXISTING_SG_ID --body ""  # Rỗng = tạo mới
+gh variable set STAGING_RDS_EXISTING_SG_ID --body ""  # Rỗng = tạo mới
+# ... tương tự cho các biến khác
+
+# Thêm secret riêng
+gh secret set STAGING_RDS_MASTER_PASSWORD
+```
+
+Sau đó cập nhật `.github/workflows/terraform.yml` để đọc biến theo environment.
+
 ---
 
 ## Các lệnh thường dùng
