@@ -45,12 +45,15 @@ module "ec2" {
 module "rds" {
   source = "../../modules/rds"
 
-  cluster_identifier         = "database-${var.project}"
+  cluster_identifier         = "${var.project}-db"
   engine_version             = var.rds_engine_version
   master_password            = var.rds_master_password
   vpc_id                     = module.vpc.vpc_id
   subnet_ids                 = module.vpc.public_subnet_ids
   allowed_security_group_ids = [module.ec2.security_group_id]
+  serverless_min_capacity    = 0.5
+  serverless_max_capacity    = 8
+  storage_encrypted          = true
   tags                       = local.common_tags
 }
 

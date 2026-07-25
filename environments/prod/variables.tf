@@ -46,10 +46,11 @@ variable "ec2_key_name" {
 }
 
 # --- RDS ---
-# Fill in after `aws rds describe-db-clusters --db-cluster-identifier database-topvnsport`
+# Cluster: topvnsport-db (Aurora PostgreSQL Serverless v2)
 variable "rds_engine_version" {
-  description = "Aurora PostgreSQL engine version of the existing database-topvnsport cluster"
+  description = "Aurora PostgreSQL engine version"
   type        = string
+  default     = "17.4"
 }
 
 variable "rds_master_password" {

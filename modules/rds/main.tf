@@ -33,24 +33,29 @@ resource "aws_security_group" "rds" {
 }
 
 resource "aws_rds_cluster" "main" {
-  cluster_identifier        = var.cluster_identifier
-  engine                    = "aurora-postgresql"
-  engine_version            = var.engine_version
-  database_name             = var.database_name
-  master_username           = var.master_username
-  master_password           = var.master_password
-  db_subnet_group_name      = aws_db_subnet_group.main.name
-  vpc_security_group_ids    = [aws_security_group.rds.id]
-  backup_retention_period   = var.backup_retention_period
+  cluster_identifier      = var.cluster_identifier
+  engine                  = "aurora-postgresql"
+  engine_mode             = "provisioned"
+  engine_version          = var.engine_version
+  database_name           = var.database_name
+  master_username         = var.master_username
+  master_password         = var.master_password
+  db_subnet_group_name    = aws_db_subnet_group.main.name
+  vpc_security_group_ids  = [aws_security_group.rds.id]
+  backup_retention_period = var.backup_retention_period
   final_snapshot_identifier = "${var.cluster_identifier}-final"
-  skip_final_snapshot       = false
+  skip_final_snapshot     = false
+  storage_encrypted       = var.storage_encrypted
+
+  serverless_v2_scaling_configuration {
+    min_capacity = var.serverless_min_capacity
+    max_capacity = var.serverless_max_capacity
+  }
 
   tags = merge(var.tags, {
     Name = var.cluster_identifier
   })
 
-  # Password rotation is handled outside Terraform (e.g. AWS Secrets Manager);
-  # importing an existing cluster should not force a password reset.
   lifecycle {
     ignore_changes = [master_password]
   }
@@ -61,7 +66,7 @@ resource "aws_rds_cluster_instance" "main" {
   cluster_identifier = aws_rds_cluster.main.id
   engine             = aws_rds_cluster.main.engine
   engine_version     = aws_rds_cluster.main.engine_version
-  instance_class     = var.instance_class
+  instance_class     = "db.serverless"
 
   tags = merge(var.tags, {
     Name = "${var.cluster_identifier}-instance-1"

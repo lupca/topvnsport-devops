@@ -26,10 +26,22 @@ variable "database_name" {
   default     = "postgres"
 }
 
-variable "instance_class" {
-  description = "Instance class for the cluster instance"
-  type        = string
-  default     = "db.t3.medium"
+variable "serverless_min_capacity" {
+  description = "Minimum ACU capacity for Serverless v2"
+  type        = number
+  default     = 0.5
+}
+
+variable "serverless_max_capacity" {
+  description = "Maximum ACU capacity for Serverless v2"
+  type        = number
+  default     = 8
+}
+
+variable "storage_encrypted" {
+  description = "Enable storage encryption"
+  type        = bool
+  default     = true
 }
 
 variable "vpc_id" {
