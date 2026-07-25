@@ -19,12 +19,16 @@
 ## RDS Aurora PostgreSQL — CONNECTED (2026-07-25)
 | Key | Value |
 |:----|:------|
-| Cluster Endpoint | `database-topvnsport.cluster-copm008y8icu.us-east-1.rds.amazonaws.com` |
+| Cluster Identifier | `topvnsport-db` |
+| Cluster Endpoint | `topvnsport-db.cluster-copm008y8icu.us-east-1.rds.amazonaws.com` |
 | Port | `5432` |
 | Databases | `pmi`, `oms`, `wms`, `identity` |
 | Username | `postgres` |
-| Auth | IAM Database Authentication |
+| Auth | **Password auth** (no IAM) |
+| Engine | Aurora PostgreSQL 17.4 Serverless v2 |
 | Status | **Data migrated, verified** |
+
+> **Old cluster** `database-topvnsport` (with IAM auth) is deprecated — delete after confirming apps work with new cluster.
 
 ### Databases Migrated
 | Database | Records | Migrated |
@@ -36,9 +40,9 @@
 
 ### RDS Connection Example
 ```bash
-export RDSHOST="database-topvnsport.cluster-copm008y8icu.us-east-1.rds.amazonaws.com"
-TOKEN=$(aws rds generate-db-auth-token --hostname $RDSHOST --port 5432 --username postgres --region us-east-1)
-psql "host=$RDSHOST port=5432 dbname=pmi user=postgres sslmode=require password=$TOKEN"
+export RDSHOST="topvnsport-db.cluster-copm008y8icu.us-east-1.rds.amazonaws.com"
+export PGPASSWORD="<from GitHub Secrets or .env>"
+psql "host=$RDSHOST port=5432 dbname=oms user=postgres sslmode=require"
 ```
 
 ## S3 — CREATED + DATA MIGRATED (2026-07-25)
