@@ -1,4 +1,22 @@
-# Copy this file to terraform.tfvars and fill in values
-# terraform.tfvars is gitignored
+# Copy this file to terraform.tfvars and fill in with values discovered via
+# `aws ec2 describe-vpcs`, `describe-subnets`, `describe-instances`, and
+# `aws rds describe-db-clusters` — see docs/migration-runbook.md, Phase 2: Discovery.
+# terraform.tfvars is gitignored - never commit real values or passwords here.
 
-# region = "ap-southeast-1"
+region = "us-east-1"
+
+# --- VPC ---
+vpc_cidr            = "10.0.0.0/16"
+public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
+availability_zones  = ["us-east-1a", "us-east-1b"]
+
+# --- EC2 (instance i-0ede7353edeef0c63) ---
+ec2_ami_id   = "ami-xxxxxxxxxxxxxxxxx"
+ec2_key_name = "topvnsport-key"
+
+# --- RDS (cluster database-topvnsport) ---
+rds_engine_version = "15.4"
+
+# Do not put the real password here. Set it out-of-band instead, e.g.:
+#   export TF_VAR_rds_master_password="$(aws secretsmanager get-secret-value ...)"
+# rds_master_password = "CHANGE_ME"

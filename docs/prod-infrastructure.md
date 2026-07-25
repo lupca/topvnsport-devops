@@ -78,3 +78,5 @@ S3_REGION=us-east-1
 4. Migrate data: PostgreSQL containers → RDS
 5. Migrate files: MinIO → S3
 6. Update CI/CD with new env vars
+
+See [[docs/migration-runbook.md]] for step-by-step execution instructions.

@@ -27,15 +27,26 @@ on:
 
 env:
   TF_VERSION: '1.6.0'
-  # Configure your cloud provider credentials as secrets
-  # AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  # AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: us-east-1
+  # Required to plan environments/prod - see docs/migration-runbook.md, Phase 2.
+  TF_VAR_vpc_cidr: ${{ vars.PROD_VPC_CIDR }}
+  TF_VAR_public_subnet_cidrs: ${{ vars.PROD_PUBLIC_SUBNET_CIDRS }}
+  TF_VAR_availability_zones: ${{ vars.PROD_AVAILABILITY_ZONES }}
+  TF_VAR_ec2_ami_id: ${{ vars.PROD_EC2_AMI_ID }}
+  TF_VAR_ec2_key_name: ${{ vars.PROD_EC2_KEY_NAME }}
+  TF_VAR_rds_engine_version: ${{ vars.PROD_RDS_ENGINE_VERSION }}
+  TF_VAR_rds_master_password: ${{ secrets.PROD_RDS_MASTER_PASSWORD }}
 
 jobs:
   terraform-plan:
-    name: Terraform Plan
+    name: Terraform Plan (${{ matrix.environment }})
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    strategy:
+      matrix:
+        environment: [dev, staging, prod]
 
     steps:
       - name: Checkout
@@ -49,16 +60,16 @@ jobs:
       - name: Terraform Format Check
         run: terraform fmt -check -recursive
 
-      - name: Terraform Init (dev)
-        working-directory: environments/dev
+      - name: Terraform Init
+        working-directory: environments/${{ matrix.environment }}
         run: terraform init
 
       - name: Terraform Validate
-        working-directory: environments/dev
+        working-directory: environments/${{ matrix.environment }}
         run: terraform validate
 
       - name: Terraform Plan
-        working-directory: environments/dev
+        working-directory: environments/${{ matrix.environment }}
         run: terraform plan -no-color
         continue-on-error: true
 

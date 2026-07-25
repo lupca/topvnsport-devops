@@ -1,10 +1,11 @@
-# Uncomment and configure for remote state
-# terraform {
-#   backend "s3" {
-#     bucket         = "topvnsport-terraform-state"
-#     key            = "prod/terraform.tfstate"
-#     region         = "ap-southeast-1"
-#     encrypt        = true
-#     dynamodb_table = "terraform-state-lock"
-#   }
-# }
+# State backend must be created out-of-band before `terraform init`
+# (see docs/migration-runbook.md, Phase 1: State Backend Setup).
+terraform {
+  backend "s3" {
+    bucket         = "topvnsport-terraform-state"
+    key            = "prod/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "terraform-state-lock"
+  }
+}
