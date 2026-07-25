@@ -1,0 +1,577 @@
+<title>TopVNSport Infrastructure - Phase 1</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --surface: #1a2332;
+    --border: #2d3a4f;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --aws-orange: #ff9900;
+    --aws-blue: #232f3e;
+    --compute: #ec7211;
+    --database: #3b48cc;
+    --storage: #7b42bc;
+    --network: #1a73e8;
+    --container: #2496ed;
+    --success: #3fb950;
+    --warning: #d29922;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f6f8fa;
+      --surface: #ffffff;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --text-muted: #656d76;
+    }
+  }
+
+  :root[data-theme="light"] {
+    --bg: #f6f8fa;
+    --surface: #ffffff;
+    --border: #d0d7de;
+    --text: #1f2328;
+    --text-muted: #656d76;
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0f1419;
+    --surface: #1a2332;
+    --border: #2d3a4f;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    padding: 2rem;
+    min-height: 100vh;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .badge-current {
+    background: var(--warning);
+    color: #000;
+  }
+
+  .badge-target {
+    background: var(--success);
+    color: #000;
+  }
+
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .diagram {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .cloud-region {
+    background: linear-gradient(135deg, rgba(255,153,0,0.08), rgba(255,153,0,0.02));
+    border: 1px dashed var(--aws-orange);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .region-label {
+    font-size: 0.7rem;
+    color: var(--aws-orange);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .resource {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .resource:last-child {
+    margin-bottom: 0;
+  }
+
+  .resource-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .resource-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .icon-ec2 { background: var(--compute); }
+  .icon-rds { background: var(--database); }
+  .icon-s3 { background: var(--storage); }
+  .icon-vpc { background: var(--network); }
+  .icon-docker { background: var(--container); }
+
+  .resource-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .resource-detail {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .containers {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .container {
+    background: rgba(36, 150, 237, 0.1);
+    border: 1px solid rgba(36, 150, 237, 0.3);
+    border-radius: 4px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .container-icon {
+    width: 14px;
+    height: 14px;
+    background: var(--container);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.55rem;
+    color: #fff;
+  }
+
+  .problem {
+    background: rgba(210, 153, 34, 0.1);
+    border-left: 3px solid var(--warning);
+    padding: 0.5rem 0.75rem;
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .managed-service {
+    background: linear-gradient(135deg, rgba(59, 72, 204, 0.1), rgba(59, 72, 204, 0.02));
+    border: 1px solid rgba(59, 72, 204, 0.3);
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .managed-label {
+    font-size: 0.6rem;
+    color: var(--database);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.25rem;
+  }
+
+  .storage-service {
+    background: linear-gradient(135deg, rgba(123, 66, 188, 0.1), rgba(123, 66, 188, 0.02));
+    border: 1px solid rgba(123, 66, 188, 0.3);
+  }
+
+  .storage-service .managed-label {
+    color: var(--storage);
+  }
+
+  .benefit {
+    background: rgba(63, 185, 80, 0.1);
+    border-left: 3px solid var(--success);
+    padding: 0.5rem 0.75rem;
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .arrow-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 0;
+  }
+
+  .arrow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+
+  .arrow svg {
+    width: 32px;
+    height: 32px;
+    stroke: var(--success);
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .legend-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .service-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .service-name {
+    font-weight: 600;
+    margin-bottom: 0.15rem;
+  }
+
+  .service-port {
+    color: var(--text-muted);
+    font-family: ui-monospace, monospace;
+    font-size: 0.65rem;
+  }
+
+  .connection-line {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    padding: 0.25rem 0;
+  }
+
+  .connection-line::before {
+    content: "";
+    width: 20px;
+    height: 1px;
+    background: var(--border);
+  }
+</style>
+
+<div class="header">
+  <h1>TopVNSport Infrastructure</h1>
+  <p class="subtitle">Phase 1: IaC Foundation — Current State vs Target Architecture</p>
+</div>
+
+<div class="grid">
+  <!-- Current State -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-current">Current</span>
+      <span class="card-title">Single EC2 + Containers</span>
+    </div>
+
+    <div class="diagram">
+      <div class="cloud-region">
+        <div class="region-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 18a5 5 0 0 0-10 0"/>
+            <path d="M12 9V3"/>
+            <path d="m9 6 3-3 3 3"/>
+          </svg>
+          AWS us-east-1
+        </div>
+
+        <div class="resource">
+          <div class="resource-header">
+            <div class="resource-icon icon-ec2">EC2</div>
+            <div>
+              <div class="resource-name">topvnsport</div>
+              <div class="resource-detail">t3.medium · 52.203.250.214</div>
+            </div>
+          </div>
+
+          <div class="containers">
+            <div class="container">
+              <div class="container-icon">🐘</div>
+              <span>PMI DB :15433</span>
+            </div>
+            <div class="container">
+              <div class="container-icon">🐘</div>
+              <span>OMS DB :15434</span>
+            </div>
+            <div class="container">
+              <div class="container-icon">🐘</div>
+              <span>WMS DB :15435</span>
+            </div>
+            <div class="container">
+              <div class="container-icon">🐘</div>
+              <span>Identity DB</span>
+            </div>
+            <div class="container">
+              <div class="container-icon">📦</div>
+              <span>MinIO :19005</span>
+            </div>
+            <div class="container">
+              <div class="container-icon">🌐</div>
+              <span>Nginx :80</span>
+            </div>
+          </div>
+
+          <div class="services-grid">
+            <div class="service-item">
+              <div class="service-name">PMI API</div>
+              <div class="service-port">:18100</div>
+            </div>
+            <div class="service-item">
+              <div class="service-name">OMS API</div>
+              <div class="service-port">:18101</div>
+            </div>
+            <div class="service-item">
+              <div class="service-name">WMS API</div>
+              <div class="service-port">:18102</div>
+            </div>
+            <div class="service-item">
+              <div class="service-name">Identity</div>
+              <div class="service-port">:18110</div>
+            </div>
+            <div class="service-item">
+              <div class="service-name">Web</div>
+              <div class="service-port">:3000</div>
+            </div>
+          </div>
+
+          <div class="problem">
+            ⚠️ Single point of failure — DB containers lose data if EC2 dies
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Target State -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-target">Target</span>
+      <span class="card-title">EC2 + Managed Services</span>
+    </div>
+
+    <div class="diagram">
+      <div class="cloud-region">
+        <div class="region-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 18a5 5 0 0 0-10 0"/>
+            <path d="M12 9V3"/>
+            <path d="m9 6 3-3 3 3"/>
+          </svg>
+          AWS us-east-1
+        </div>
+
+        <!-- RDS -->
+        <div class="managed-service">
+          <div class="managed-label">Managed Database</div>
+          <div class="resource-header">
+            <div class="resource-icon icon-rds">RDS</div>
+            <div>
+              <div class="resource-name">Aurora PostgreSQL</div>
+              <div class="resource-detail">database-topvnsport.cluster-*.rds.amazonaws.com</div>
+            </div>
+          </div>
+          <div class="containers" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="container" style="background: rgba(59,72,204,0.1); border-color: rgba(59,72,204,0.3);">
+              <span>pmi</span>
+            </div>
+            <div class="container" style="background: rgba(59,72,204,0.1); border-color: rgba(59,72,204,0.3);">
+              <span>oms</span>
+            </div>
+            <div class="container" style="background: rgba(59,72,204,0.1); border-color: rgba(59,72,204,0.3);">
+              <span>wms</span>
+            </div>
+            <div class="container" style="background: rgba(59,72,204,0.1); border-color: rgba(59,72,204,0.3);">
+              <span>identity</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- S3 -->
+        <div class="managed-service storage-service">
+          <div class="managed-label">Managed Storage</div>
+          <div class="resource-header">
+            <div class="resource-icon icon-s3">S3</div>
+            <div>
+              <div class="resource-name">topvnsport-assets</div>
+              <div class="resource-detail">Product images, documents</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EC2 -->
+        <div class="resource">
+          <div class="resource-header">
+            <div class="resource-icon icon-ec2">EC2</div>
+            <div>
+              <div class="resource-name">topvnsport</div>
+              <div class="resource-detail">t3.medium · Apps only</div>
+            </div>
+          </div>
+
+          <div class="containers">
+            <div class="container">
+              <div class="container-icon">🌐</div>
+              <span>Nginx :80</span>
+            </div>
+          </div>
+
+          <div class="services-grid">
+            <div class="service-item">
+              <div class="service-name">PMI API</div>
+              <div class="service-port">→ RDS, S3</div>
+            </div>
+            <div class="service-item">
+              <div class="service-name">OMS API</div>
+              <div class="service-port">→ RDS</div>
+            </div>
+            <div class="service-item">
+              <div class="service-name">WMS API</div>
+              <div class="service-port">→ RDS</div>
+            </div>
+            <div class="service-item">
+              <div class="service-name">Identity</div>
+              <div class="service-port">→ RDS</div>
+            </div>
+            <div class="service-item">
+              <div class="service-name">Web</div>
+              <div class="service-port">:3000</div>
+            </div>
+          </div>
+
+          <div class="benefit">
+            ✓ Auto-backup · ✓ Multi-AZ ready · ✓ No data loss if EC2 fails
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-icon" style="background: var(--compute);"></div>
+    <span>EC2 Compute</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-icon" style="background: var(--database);"></div>
+    <span>RDS Database</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-icon" style="background: var(--storage);"></div>
+    <span>S3 Storage</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-icon" style="background: var(--container);"></div>
+    <span>Docker Container</span>
+  </div>
+</div>
